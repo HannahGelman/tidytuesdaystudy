@@ -89,14 +89,14 @@ summary(astro_sum$total_hours_mission)
 
 ```{r}
 astro_sum %>% 
-  ggplot(aes(year_of_first_mission_bin, total_hours_mission)) + 
+  ggplot(aes(year_of_first_mission_bin, log(total_hours_mission))) + 
   geom_boxplot() + 
   geom_point(alpha = .25, shape = 'o', size = 5)
 ```
 
 ```{r}
 astro %>% 
-  ggplot(aes(year_of_mission_bin, hours_mission)) +
+  ggplot(aes(year_of_mission_bin, log(hours_mission))) +
   geom_boxplot() + 
   geom_point(alpha = .25, shape = 'o', size = 5)
 ```
@@ -105,7 +105,7 @@ Explore what is driving the 2010-2019 results
 
 ```{r}
 astro_sum %>% 
-  ggplot(aes(x = total_hours_mission, color = year_of_first_mission_bin)) + 
+  ggplot(aes(x = (total_hours_mission), color = year_of_first_mission_bin)) + 
   geom_freqpoly(binwidth = 1000)
 ```
 
