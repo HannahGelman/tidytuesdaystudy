@@ -1,0 +1,117 @@
+---
+title: "Tidy Tuesday Week 1"
+output: html_notebook 
+---
+
+### Tidy Tuesday Week 1: Astronauts (2020, Week 29)
+
+
+```{r}
+library("tidyverse")
+library("tidytuesdayR")
+library("janitor")
+library("knitr")
+
+```
+
+```{r}
+tuesdata<- tidytuesdayR::tt_load(2020, week = 29)
+astro <- tuesdata$astronauts 
+
+```
+
+```{r}
+astro %>% group_by(military_civilian) %>% tally()
+```
+
+```{r}
+head(astro)
+```
+
+Collapse rows by astronaunt 
+```{r}
+
+astro_sum <- astro %>% group_by(number) %>%  
+  mutate(rn = row_number(),
+         total_hours_mission = sum(hours_mission), 
+         total_eva_hours_mission = sum(eva_hrs_mission)) %>% 
+  rename(year_of_first_mission = year_of_mission) %>% 
+  filter(mission_number == 1) %>% 
+  select(number, nationwide_number, name, original_name, sex, year_of_birth, nationality, 
+         military_civilian, selection, year_of_selection, total_number_of_missions, occupation, 
+         year_of_first_mission, total_hours_mission, total_eva_hours_mission)
+
+
+```
+
+Plot number of missions by year of first mission 
+
+```{r}
+astro_sum %>% 
+  ggplot(aes(year_of_first_mission, total_number_of_missions)) +
+  geom_point()
+```
+
+Plot total mission time by year of first mission 
+
+```{r}
+astro_sum %>% 
+  ggplot(aes(year_of_first_mission, total_hours_mission)) +
+  geom_point() + 
+  geom_point(aes(year_of_first_mission, total_eva_hours_mission))
+```
+
+```{r}
+astro_sum %>% 
+  ggplot(aes(year_of_first_mission, total_eva_hours_mission)) +
+  geom_point()
+```
+
+Bin the mission years 
+
+```{r}
+summary(astro$year_of_mission)
+```
+
+```{r}
+astro$year_of_mission_bin <- cut(astro$year_of_mission, c(1960, 1969, 1979, 1989, 1999, 2009, 2019 ), labels = c('1960-1969', '1970-1979', '1980-1989', '1990-1999', '2000-2009', '2010-2019'))
+astro_sum$year_of_first_mission_bin <- cut(astro_sum$year_of_first_mission, c(1960, 1969, 1979, 1989, 1999, 2009, 2020 ), labels = c('1960-1969', '1970-1979', '1980-1989', '1990-1999', '2000-2009', '2010-2019'))
+```
+
+```{r}
+astro_sum %>% group_by(year_of_first_mission_bin) %>% 
+  tally()
+```
+
+```{r}
+summary(astro_sum$total_hours_mission)
+```
+
+```{r}
+astro_sum %>% 
+  ggplot(aes(year_of_first_mission_bin, total_hours_mission)) + 
+  geom_boxplot() + 
+  geom_point(alpha = .25, shape = 'o', size = 5)
+```
+
+```{r}
+astro %>% 
+  ggplot(aes(year_of_mission_bin, hours_mission)) +
+  geom_boxplot() + 
+  geom_point(alpha = .25, shape = 'o', size = 5)
+```
+
+Explore what is driving the 2010-2019 results 
+
+```{r}
+astro_sum %>% 
+  ggplot(aes(x = total_hours_mission, color = year_of_first_mission_bin)) + 
+  geom_freqpoly(binwidth = 1000)
+```
+
+```{r}
+astro %>% 
+  ggplot(aes(x = hours_mission, color = year_of_mission_bin)) + 
+  geom_freqpoly(binwidth = 500)
+```
+
